@@ -1,0 +1,47 @@
+{
+  "name": "VisaFeed",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "lint": "eslint src",
+    "pretty": "prettier --semi false --print-width 100 --single-quote --trailing-comma all --write \"src/**/*.js\"",
+    "flow": "flow",
+    "flow-stop": "flow stop",
+    "test": "jest"
+  },
+  "lint-staged": {
+    "*.js": [
+      "yarn pretty",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "react": "16.3.1",
+    "react-native": "0.55.4",
+    "react-native-elements": "^0.19.1",
+    "react-native-splash-screen": "^3.0.9",
+    "react-native-vector-icons": "^4.6.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.3",
+    "babel-jest": "23.0.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-react-native": "4.0.0",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-flowtype": "^2.49.3",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.9.1",
+    "flow-bin": "^0.67.1",
+    "husky": "^0.14.3",
+    "jest": "23.1.0",
+    "lint-staged": "^7.2.0",
+    "prettier": "^1.13.5",
+    "react-test-renderer": "16.3.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
