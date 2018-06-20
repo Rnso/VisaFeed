@@ -1,2 +1,2 @@
 # VisaFeed
-A project to feed news on visa across Newspapers in UAE
+A ReactNative App to feed news on visa across Newspapers in UAE
