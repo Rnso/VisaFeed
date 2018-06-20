@@ -142,9 +142,11 @@ export default class App extends Component<Props, State> {
                             item.link.split('.')[0] === 'https://gulfnews' ?
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Text style={{ color: '#808080' }}>GulfNews</Text>
+                                <Text style={{ color: '#808080' }}>{item.time}</Text>
                               </View> :
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Text style={{ color: '#808080' }}>{item.link.split('.')[1]}</Text>
+                                <Text style={{ color: '#808080' }}>{item.time}</Text>
                               </View>
                           }
                         </View>
