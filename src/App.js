@@ -6,7 +6,6 @@ import {
   Dimensions,
   Text,
   View,
-  FlatList,
   Image,
   TouchableOpacity,
   RefreshControl,
@@ -14,10 +13,10 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native'
-import { Icon, SearchBar } from 'react-native-elements'
+import { SearchBar } from 'react-native-elements'
 import SplashScreen from 'react-native-splash-screen'
 import styles from './Style'
-import * as temp from './url'
+//import * as temp from './url'
 
 type data = {
   link: string,
@@ -50,18 +49,20 @@ export default class App extends Component<Props, State> {
     SplashScreen.hide()
   }
   fetchData() {
-     fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&sort=date:d:s`)
-       .then(response => {
-         return response.json()
-       })
-       .then(json => {
-         let newsdata = []
-         json.items.map(item => {
-           newsdata.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
-         })
-         this.setState({ news: newsdata })
-         this.setState({ refreshing: false })
-       })
+    fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))`)
+      .then(response => {
+        return response.json()
+      })
+      .then(json => {
+        let newsdata = []
+        json.items.map(item => {
+          newsdata.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
+        })
+        this.state.count = this.state.count + 10
+        this.setState(this.state)
+        this.setState({ news: newsdata })
+        this.setState({ refreshing: false })
+      })
 
   }
   handleShowNewspage(link: string) {
@@ -75,20 +76,18 @@ export default class App extends Component<Props, State> {
     console.log('Refresh')
   }
   handleNextPage() {
-    this.state.count = this.state.count + 10
-    this.setState(this.state)
-    console.log(this.state.count)
-    fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=visa&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&sort=date:d:s&start=${this.state.count+1}`)
+    fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&start=${this.state.count + 1}`)
       .then(response => {
         return response.json()
       })
       .then(json => {
         json.items.map(item => {
-          this.state.news.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src,time: item.snippet.split('.')[0] })
+          this.state.news.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
         })
-        //this.setState({ news: newsdata })
+        this.state.count = this.state.count + 10
         this.setState(this.state)
-      }) 
+        console.log(this.state.count)
+      })
   }
   render() {
     let width = Dimensions.get('window').width
@@ -99,7 +98,7 @@ export default class App extends Component<Props, State> {
           this.state.webview ?
             <View style={styles.container}>
               <View style={styles.webview_header}>
-                <TouchableOpacity onPress={() => {this.state.loading= true; this.setState({ webview: false })}} hitSlop={{ top: 20, bottom: 20, left: 50, right: 40 }}>
+                <TouchableOpacity onPress={() => { this.state.loading = true; this.setState({ webview: false }) }} hitSlop={{ top: 20, bottom: 20, left: 50, right: 40 }}>
                   <Text style={{ color: 'blue', fontSize: 18 }}>Back</Text>
                 </TouchableOpacity>
               </View>
@@ -143,11 +142,9 @@ export default class App extends Component<Props, State> {
                             item.link.split('.')[0] === 'https://gulfnews' ?
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Text style={{ color: '#808080' }}>GulfNews</Text>
-                                <Text style={{ color: '#808080' }}>{item.time}</Text>
                               </View> :
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Text style={{ color: '#808080' }}>{item.link.split('.')[1]}</Text>
-                                <Text style={{ color: '#808080' }}>{item.time}</Text>
                               </View>
                           }
                         </View>
