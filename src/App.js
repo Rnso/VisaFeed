@@ -81,8 +81,9 @@ export default class App extends Component<Props, State> {
     this.setState({ uri: link })
   }
   handleRefresh() {
-    this.setState({ show_searchbar: this.state.show_searchbar ? false : true })
-    this.setState({ refreshing: true })
+    this.state.show_searchbar = this.state.show_searchbar ? false : true
+    this.state.refreshing = true
+    this.setState(this.state)
     this.fetchData()
     console.log('Refresh')
   }
