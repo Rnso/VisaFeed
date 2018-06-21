@@ -180,7 +180,7 @@ export default class App extends Component<Props, State> {
                             name={Platform.OS === 'ios' ? 'ios-share-outline' : 'share'}
                             type={Platform.OS === 'ios' ? 'ionicon' : 'material'}
                             size={24}
-                            color='black'
+                            color='#808080'
                             onPress={this.handleShare.bind(this, item.title, item.link)} />
                         </TouchableOpacity>
                       </View>
