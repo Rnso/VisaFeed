@@ -37,11 +37,5 @@ export default StyleSheet.create({
 loadbutton:{
   color: '#808080', 
   fontSize: 18, 
-  borderWidth: 0.5,
-  borderStyle: 'solid',
-  borderRadius: 15,
-  borderColor: '#DDDDDD',
-  padding: 6,
-  textAlign: 'center',
 }
 })

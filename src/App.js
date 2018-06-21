@@ -12,8 +12,10 @@ import {
   WebView,
   ScrollView,
   ActivityIndicator,
+  Share,
+  LayoutAnimation,
 } from 'react-native'
-import { SearchBar } from 'react-native-elements'
+import { Icon, SearchBar } from 'react-native-elements'
 import SplashScreen from 'react-native-splash-screen'
 import styles from './Style'
 //import * as temp from './url'
@@ -42,7 +44,16 @@ type State = {
 export default class App extends Component<Props, State> {
   constructor() {
     super()
-    this.state = { refreshing: false, webview: false, loading: true, search_string: 'visa', show_searchbar: false, uri: '', news: [], count: 0 }
+    this.state = {
+      refreshing: false,
+      webview: false,
+      loading: true,
+      search_string: 'visa',
+      show_searchbar: false,
+      uri: '',
+      news: [],
+      count: 0,
+    }
   }
   componentDidMount() {
     this.fetchData()
@@ -75,7 +86,7 @@ export default class App extends Component<Props, State> {
     this.fetchData()
     console.log('Refresh')
   }
-  handleNextPage() {
+  handleLoadMore() {
     fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&start=${this.state.count + 1}`)
       .then(response => {
         return response.json()
@@ -89,6 +100,19 @@ export default class App extends Component<Props, State> {
         console.log(this.state.count)
       })
   }
+  handleShare(title, link) {
+    Share.share({
+      message: undefined,
+      url: `${link}`,
+      title: `${title}`,
+    },
+      {
+        dialogTitle: `${title}`,
+      }).then(result => {
+        console.log(result)
+      })
+      .catch(err => console.log(err))
+  }
   render() {
     let width = Dimensions.get('window').width
     let height = Dimensions.get('window').height
@@ -99,7 +123,7 @@ export default class App extends Component<Props, State> {
             <View style={styles.container}>
               <View style={styles.webview_header}>
                 <TouchableOpacity onPress={() => { this.state.loading = true; this.setState({ webview: false }) }} hitSlop={{ top: 20, bottom: 20, left: 50, right: 40 }}>
-                  <Text style={{ color: 'blue', fontSize: 18 }}>Back</Text>
+                  <Text style={{ color: '#808080', fontSize: 18, paddingBottom: 5 }}>Back</Text>
                 </TouchableOpacity>
               </View>
               <WebView
@@ -135,25 +159,37 @@ export default class App extends Component<Props, State> {
                         style={{ width: 80, height: 70, marginRight: 10, borderRadius: 5 }}
                         source={{ uri: item.image }}
                       />
-                      <TouchableOpacity onPress={this.handleShowNewspage.bind(this, item.link)} >
-                        <View style={{ width: width - 120 }}>
+                      <View style={{ width: width - 120 }}>
+                        <TouchableOpacity onPress={this.handleShowNewspage.bind(this, item.link)} >
+
                           <Text style={styles.newstitle_font}>{item.title}</Text>
                           {
                             item.link.split('.')[0] === 'https://gulfnews' ?
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Text style={{ color: '#808080' }}>GulfNews</Text>
+                                <Text style={{ color: '#808080' }}>{item.time}|</Text>
                               </View> :
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Text style={{ color: '#808080' }}>{item.link.split('.')[1]}</Text>
+                                <Text style={{ color: '#808080' }}>{item.time}|</Text>
                               </View>
                           }
-                        </View>
-                      </TouchableOpacity>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ flexDirection: 'row-reverse', padding: 5 }} hitSlop={{ top: 10, bottom: 10, left: 30, right: 30 }}>
+                          <Icon
+                            name={Platform.OS === 'ios' ? 'ios-share-outline' : 'share'}
+                            type={Platform.OS === 'ios' ? 'ionicon' : 'material'}
+                            size={24}
+                            color='black'
+                            onPress={this.handleShare.bind(this, item.title, item.link)} />
+                        </TouchableOpacity>
+                      </View>
+
                     </View>
                   })}
                   <View style={{ alignItems: 'center', padding: 5 }}>
                     {this.state.count >= 10 ?
-                      <Text style={styles.loadbutton} onPress={() => this.handleNextPage()}>Load more </Text>
+                      <Text style={styles.loadbutton} onPress={() => this.handleLoadMore()}>Load more</Text>
                       : null}
                   </View>
                 </ScrollView>
