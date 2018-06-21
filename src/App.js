@@ -13,7 +13,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Share,
-  LayoutAnimation,
 } from 'react-native'
 import { Icon, SearchBar } from 'react-native-elements'
 import SplashScreen from 'react-native-splash-screen'
@@ -50,9 +49,11 @@ export default class App extends Component<Props, State> {
       loading: true,
       search_string: 'visa',
       show_searchbar: false,
+      load_more: false,
       uri: '',
       news: [],
       count: 0,
+      clear_icon: true
     }
   }
   componentDidMount() {
@@ -60,21 +61,23 @@ export default class App extends Component<Props, State> {
     SplashScreen.hide()
   }
   fetchData() {
-    fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))`)
-      .then(response => {
-        return response.json()
-      })
-      .then(json => {
-        let newsdata = []
-        json.items.map(item => {
-          newsdata.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
-        })
-        this.state.count = this.state.count + 10
-        this.setState(this.state)
-        this.setState({ news: newsdata })
-        this.setState({ refreshing: false })
-      })
-
+    this.setState({ load_more: true })
+    if (this.state.search_string === '') this.state.search_string = 'visa'
+     fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))`)
+       .then(response => {
+         return response.json()
+       })
+       .then(json => {
+         let newsdata = []
+         json.items.map(item => {
+           newsdata.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
+         })
+         this.state.news = newsdata
+         this.state.count = this.state.count + 10
+         this.state.load_more = false
+         this.state.refreshing = false
+         this.setState(this.state)
+       })
   }
   handleShowNewspage(link: string) {
     this.setState({ webview: true })
@@ -83,11 +86,18 @@ export default class App extends Component<Props, State> {
   handleRefresh() {
     this.state.show_searchbar = this.state.show_searchbar ? false : true
     this.state.refreshing = true
+    this.state.search_string = 'visa'
+    this.state.clear_icon = this.state.search_string === '' ? false : true
     this.setState(this.state)
     this.fetchData()
-    console.log('Refresh')
+  }
+  handleChangeText(text) {
+    this.state.search_string = text
+    this.state.clear_icon = this.state.search_string === '' ? false : true
+    this.setState(this.state)
   }
   handleLoadMore() {
+    this.setState({ load_more: true })
     fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&start=${this.state.count + 1}`)
       .then(response => {
         return response.json()
@@ -97,6 +107,7 @@ export default class App extends Component<Props, State> {
           this.state.news.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
         })
         this.state.count = this.state.count + 10
+        this.state.load_more = false
         this.setState(this.state)
         console.log(this.state.count)
       })
@@ -141,10 +152,14 @@ export default class App extends Component<Props, State> {
                 <View style={[styles.header, this.state.show_searchbar ? { marginTop: Platform.OS === 'ios' ? 20 : 0, } : '']}>
                   <SearchBar
                     platform={Platform.OS === 'ios' ? 'ios' : 'android'}
+                    clearIcon={this.state.clear_icon}
                     containerStyle={{ width: '100%' }}
-                    searchIcon={{ size: 24 }}
-                    onChangeText={(text) => { this.state.search_string = text; this.setState({ search_string: text }); console.log(this.state.search_string); this.fetchData() }}
-                    onClear={() => { }}
+                    inputStyle={{ fontSize: 16 }}
+                    searchIcon={{ size: 28 }}
+                    returnKeyType={'done'}
+                    value={this.state.search_string}
+                    onChangeText={this.handleChangeText.bind(this)}
+                    onSubmitEditing={() => this.fetchData()}
                     placeholder='Search your interests' />
                 </View> : null}
               <View style={[{ flex: 10 }, this.state.show_searchbar ? '' : { marginTop: Platform.OS === 'ios' ? 45 : 0, }]}>
@@ -189,9 +204,14 @@ export default class App extends Component<Props, State> {
                     </View>
                   })}
                   <View style={{ alignItems: 'center', padding: 5 }}>
-                    {this.state.count >= 10 ?
+                    {this.state.count >= 10 && !this.state.load_more ?
                       <Text style={styles.loadbutton} onPress={() => this.handleLoadMore()}>Load more</Text>
                       : null}
+                    {this.state.load_more ?
+                      <ActivityIndicator
+                        style={{}}
+                        size="large" /> : null
+                    }
                   </View>
                 </ScrollView>
               </View>
