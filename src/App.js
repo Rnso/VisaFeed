@@ -17,7 +17,7 @@ import {
 import { Icon, SearchBar } from 'react-native-elements'
 import SplashScreen from 'react-native-splash-screen'
 import styles from './Style'
-//import * as temp from './url'
+import * as temp from './url'
 
 type data = {
   link: string,
@@ -40,6 +40,8 @@ type State = {
   uri?: string,
   count: number,
 }
+const KEY = 'ENTER_YOUR_KEY_HERE'
+const cx = 'ENTER_YOUR_ID_HERE'
 export default class App extends Component<Props, State> {
   constructor() {
     super()
@@ -63,21 +65,21 @@ export default class App extends Component<Props, State> {
   fetchData() {
     this.setState({ load_more: true })
     if (this.state.search_string === '') this.state.search_string = 'visa'
-     fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))`)
-       .then(response => {
-         return response.json()
-       })
-       .then(json => {
-         let newsdata = []
-         json.items.map(item => {
-           newsdata.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
-         })
-         this.state.news = newsdata
-         this.state.count = this.state.count + 10
-         this.state.load_more = false
-         this.state.refreshing = false
-         this.setState(this.state)
-       })
+    fetch(`https://www.googleapis.com/customsearch/v1?key=${KEY}&cx=${cx}&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))`)
+      .then(response => {
+        return response.json()
+      })
+      .then(json => {
+        let newsdata = []
+        json.items.map(item => {
+          newsdata.push({ link: item.link, title: item.pagemap.metatags[0]['og:title'], image: item.pagemap.cse_thumbnail[0].src, time: item.snippet.split('.')[0] })
+        })
+        this.state.news = newsdata
+        this.state.count = this.state.count + 10
+        this.state.load_more = false
+        this.state.refreshing = false
+        this.setState(this.state)
+      })
   }
   handleShowNewspage(link: string) {
     this.setState({ webview: true })
@@ -98,7 +100,7 @@ export default class App extends Component<Props, State> {
   }
   handleLoadMore() {
     this.setState({ load_more: true })
-    fetch(`https://www.googleapis.com/customsearch/v1?key=AIzaSyDj4oDbphHS81GkioQqzVC43Et039KvFGQ&cx=004101686134906633925:ufq5lye8wom&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&start=${this.state.count + 1}`)
+    fetch(`https://www.googleapis.com/customsearch/v1?key=${KEY}&cx=${cx}&q=${this.state.search_string}&fields=searchInformation,items(link,snippet,pagemap/metatags(og:title),pagemap/cse_thumbnail(src))&start=${this.state.count + 1}`)
       .then(response => {
         return response.json()
       })
